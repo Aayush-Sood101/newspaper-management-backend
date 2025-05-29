@@ -10,6 +10,10 @@ const authorize  = require('./middleware/authorize');
 
 const app = express();
 
+// Add JSON parsing middleware
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 // Allow Next.js (http://localhost:3000) to call this API
 app.use(cors({
   origin: [
@@ -18,7 +22,6 @@ app.use(cors({
   ],
   credentials: true,
 }));
-
 
 // connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
@@ -48,6 +51,12 @@ app.get('/', authorize(['admin']), (req, res) => {
 
 app.get('/setup', authorize(['admin']), (req, res) => {
   res.json({ message: 'Admin Setup' });
+});
+
+// Error handling middleware
+app.use((error, req, res, next) => {
+  console.error('Unhandled error:', error);
+  res.status(500).json({ message: 'Internal server error' });
 });
 
 // start server

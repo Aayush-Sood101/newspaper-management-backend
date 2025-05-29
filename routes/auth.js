@@ -6,11 +6,14 @@ const bcrypt = require('bcryptjs');
 const User   = require('../models/User.js');
 
 // POST /api/auth/signin
-// ...existing code...
-
 router.post('/signin', async (req, res) => {
   try {
     const { email, password } = req.body;
+
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
 
     // Find user
     const user = await User.findOne({ email });
@@ -52,11 +55,7 @@ router.post('/signin', async (req, res) => {
   }
 });
 
-// ...existing code...
-
-
-
-// Add this verify endpoint
+// GET /api/auth/verify
 router.get('/verify', async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
@@ -68,7 +67,6 @@ router.get('/verify', async (req, res) => {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
     
     // Find user to get current data
-    const User = require('../models/User');
     const user = await User.findById(payload.sub).select('-password');
     
     if (!user) {
