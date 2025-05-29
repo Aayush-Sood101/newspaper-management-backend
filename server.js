@@ -18,7 +18,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors({
   origin: [
     'http://localhost:3000',
-    'https://newspaper-management-backend.onrender.com'
+    'https://newspaper-management-backend.onrender.com',
+    'https://newspaper-management-frontend-8qpc.vercel.app'  // Add this line
   ],
   credentials: true,
 }));
