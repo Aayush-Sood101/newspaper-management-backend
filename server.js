@@ -12,11 +12,13 @@ const app = express();
 
 // Allow Next.js (http://localhost:3000) to call this API
 app.use(cors({
-  origin: 'http://localhost:3000',
+  origin: [
+    'http://localhost:3000',
+    'https://newspaper-management-backend.onrender.com'
+  ],
   credentials: true,
 }));
 
-app.use(express.json());
 
 // connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
