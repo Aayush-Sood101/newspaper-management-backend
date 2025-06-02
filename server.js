@@ -19,11 +19,11 @@ app.use(cors({
   origin: [
     'http://localhost:3000',
     'https://newspaper-management-backend.onrender.com',
-    'https://newspaper-management-frontend.vercel.app/'  // Add this line
+    'https://newspaper-management-frontend.vercel.app'  // Add this line
   ],
   credentials: true,
 }));
-
+app.options('*', cors());
 // connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
