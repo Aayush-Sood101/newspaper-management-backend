@@ -62,6 +62,7 @@ router.post('/', async (req, res) => {
 });
 
 // Generate monthly report
+// Generate monthly report
 router.get('/report/:month/:year', async (req, res) => {
   try {
     const { month, year } = req.params;
@@ -77,19 +78,11 @@ router.get('/report/:month/:year', async (req, res) => {
     
     // Create date range for the month
     const startDate = new Date(yearNum, monthNum - 1, 1, 0, 0, 0, 0);
-    const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999); // Last day of month
+    const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
     
     console.log(`Date range: ${startDate} to ${endDate}`);
 
-    // Get all newspapers
-    const newspapers = await Newspaper.find().lean();
-    console.log(`Found ${newspapers.length} newspapers`);
-    
-    if (newspapers.length === 0) {
-      return res.status(404).json({ message: 'No newspapers found' });
-    }
-
-    // Get all records for the month
+    // Get all records for the month first
     const records = await Record.find({
       date: { 
         $gte: startDate, 
@@ -99,12 +92,32 @@ router.get('/report/:month/:year', async (req, res) => {
     
     console.log(`Found ${records.length} records for the month`);
 
+    if (records.length === 0) {
+      return res.status(404).json({ message: 'No records found for this month' });
+    }
+
+    // Get unique newspaper IDs from the records
+    const newspaperIds = [...new Set(records.map(record => 
+      record.newspaperId && record.newspaperId._id ? record.newspaperId._id.toString() : null
+    ).filter(id => id !== null))];
+
+    // Get only newspapers that have records for this month
+    const newspapers = await Newspaper.find({
+      _id: { $in: newspaperIds }
+    }).lean();
+    
+    console.log(`Found ${newspapers.length} newspapers with records for this month`);
+
+    if (newspapers.length === 0) {
+      return res.status(404).json({ message: 'No newspapers found with records for this month' });
+    }
+
     const reportData = [];
     const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
     
     console.log(`Days in month: ${daysInMonth}`);
 
-    // Process each newspaper
+    // Process each newspaper that has records
     newspapers.forEach(newspaper => {
       try {
         const row = {
